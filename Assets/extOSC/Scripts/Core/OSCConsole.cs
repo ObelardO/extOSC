@@ -7,15 +7,10 @@ namespace extOSC.Core
 {
     public static class OSCConsole
     {
-        #region Public Vars
-
         public static List<OSCConsolePacket> ConsoleBuffer { get; set; } = new List<OSCConsolePacket>();
 
 		public static bool LogConsole { get; set; } = false;
-
-		#endregion
-
-        #region Public Methods
+        
 
         public static void Received(OSCReceiver receiver, IOSCPacket packet)
         {
@@ -41,10 +36,6 @@ namespace extOSC.Core
             Log(consolePacket);
         }
 
-        #endregion
-
-        #region Private Methods
-
         private static void Log(OSCConsolePacket consolePacket)
         {
 #if UNITY_EDITOR
@@ -59,7 +50,5 @@ namespace extOSC.Core
             }
 #endif
         }
-
-        #endregion
     }
 }

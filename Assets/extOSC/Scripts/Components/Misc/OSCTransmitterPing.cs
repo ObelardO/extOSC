@@ -36,11 +36,9 @@ namespace extOSC.Components.Misc
 
 		[Range(0, 60)]
 		[SerializeField]
-		[FormerlySerializedAs("interval")]
 		private float _interval = 1;
 
 		[SerializeField]
-		[FormerlySerializedAs("autoStart")]
 		private bool _autoStart = true;
 
 		private float _timer;

@@ -47,19 +47,15 @@ namespace extOSC.Core
         #region Private Vars
 
         [SerializeField]
-		[FormerlySerializedAs("autoConnect")]
         private bool _autoConnect = true;
 
         [SerializeField]
-		[FormerlySerializedAs("closeOnPause")]
 		private bool _closeOnPause;
 
         [SerializeField]
-		[FormerlySerializedAs("mapBundle")]
 		private OSCMapBundle _mapBundle;
 
         [SerializeField]
-		[FormerlySerializedAs("workInEditor")]
         private bool _workInEditor;
 
 		private bool _restoreOnEnable;

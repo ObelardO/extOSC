@@ -2,8 +2,6 @@
 
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-
 using extOSC.Core;
 using extOSC.Core.Events;
 
@@ -24,13 +22,8 @@ namespace extOSC
 		#endregion
 
 		#region Protected Vars
-
-		[SerializeField]
-		[FormerlySerializedAs("address")]
+		
 		private string _address;
-
-		[SerializeField]
-		[FormerlySerializedAs("callback")]
 		private OSCEventMessage _callback = new OSCEventMessage();
 
 		#endregion

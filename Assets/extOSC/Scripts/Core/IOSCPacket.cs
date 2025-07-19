@@ -1,27 +1,13 @@
 ﻿/* Copyright (c) 2024 dr. ext (Vladimir Sigalkin) */
 
+using System;
 using System.Net;
 
 namespace extOSC.Core
 {
-	public interface IOSCPacket
+	public interface IOSCPacket : ICloneable
 	{
-		#region Vars
-
 		string Address { get; }
-
-		IPAddress Ip { get; set; }
-
-		int Port { get; set; }
-
-		#endregion
-
-		#region Public Methods
-
-		bool IsBundle();
-
-		IOSCPacket Copy();
-
-		#endregion
+		IPEndPoint From { get; set; }
 	}
 }

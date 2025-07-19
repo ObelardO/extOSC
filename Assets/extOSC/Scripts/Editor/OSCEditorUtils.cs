@@ -18,7 +18,7 @@ namespace extOSC.Editor
 	public static class OSCEditorUtils
 	{
 		#region Static Public Vars
-
+		
 		public static string DebugFolder
 		{
 			get

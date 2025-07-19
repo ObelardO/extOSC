@@ -19,55 +19,44 @@ namespace extOSC
 		#region Public Vars
 
 		public string Address => "#bundle";
-
-		public IPAddress Ip
+		
+		public IPEndPoint From
 		{
-			get => _ip;
+			get => _from;
 			set
 			{
-				_ip = value;
+				_from = value;
 
-				for (var i = 0; i < Packets.Count; i++) 
-					Packets[i].Ip = value;
+				for (var i = 0; i < Packets.Count; i++)
+					Packets[i].From = value;
 			}
 		}
 
-		public int Port
-		{
-			get => _port;
-			set
-			{
-				_port = value;
+		public List<IOSCPacket> Packets { get; }
 
-				for (var i = 0; i < Packets.Count; i++) 
-					Packets[i].Port = value;
-			}
-		}
-
-		public List<IOSCPacket> Packets { get; } = new List<IOSCPacket>();
-
-		public long TimeStamp { get; set; }
+		public DateTime TimeStamp { get; set; }
 
 		#endregion
 
 		#region Private Vars
 
-		private IPAddress _ip;
-		private int _port;
+		private IPEndPoint _from;
 
 		#endregion
 
 		#region Public Methods
 
 		public OSCBundle()
-		{ }
+		{
+			Packets = new List<IOSCPacket>();
+		}
 
 		public OSCBundle(params IOSCPacket[] packets)
 		{
-			AddRange(packets);
+			Packets = new List<IOSCPacket>(packets);
 		}
 
-		public void AddPacket(IOSCPacket packet)
+		public void Append(IOSCPacket packet)
 		{
 			if (packet == null)
 				throw new NullReferenceException(nameof(packet));
@@ -75,24 +64,15 @@ namespace extOSC
 			Packets.Add(packet);
 		}
 
-		public void AddRange(IEnumerable<IOSCPacket> packets)
-		{
-			if (packets == null)
-				throw new NullReferenceException(nameof(packets));
-
-			Packets.AddRange(packets);
-		}
-
-		public bool IsBundle() => true;
-
-		public IOSCPacket Copy()
+		// TODO: Optimize.
+		public object Clone()
 		{
 			var packetsCount = Packets.Count;
 			var packets = new IOSCPacket[packetsCount];
 
 			for (var i = 0; i < packetsCount; ++i)
 			{
-				packets[i] = Packets[i].Copy();
+				packets[i] = Packets[i].Clone() as IOSCPacket;
 			}
 
 			return new OSCBundle(packets);

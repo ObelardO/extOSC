@@ -6,12 +6,8 @@ namespace extOSC.Core
 {
     public interface IOSCBind
     {
-        #region Public Vars
-
         OSCEventMessage Callback { get; }
 
         string ReceiverAddress { get; }
-
-        #endregion
     }
 }

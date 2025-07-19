@@ -104,15 +104,12 @@ namespace extOSC
 		}
 
 		[SerializeField]
-		[FormerlySerializedAs("localHostMode")]
 		private OSCLocalHostMode _localHostMode = OSCLocalHostMode.Any;
 
 		[SerializeField]
-		[FormerlySerializedAs("localHost")]
 		private string _localHost;
 
 		[SerializeField]
-		[FormerlySerializedAs("localPort")]
 		private int _localPort = 7001;
 
 		private readonly Queue<IOSCPacket> _packets = new Queue<IOSCPacket>();

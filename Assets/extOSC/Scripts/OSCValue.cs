@@ -9,13 +9,11 @@ namespace extOSC
 {
 	public class OSCValue
 	{
-		#region Static Public Methods
-
 		public static OSCValue Long(long value) => new OSCValue(OSCValueType.Long, value);
 
 		public static OSCValue Char(char value) => new OSCValue(OSCValueType.Char, value);
 
-		public static OSCValue Color(Color value) => new OSCValue(OSCValueType.Color, value);
+		public static OSCValue Color(OSCColor value) => new OSCValue(OSCValueType.Color, value);
 
 		public static OSCValue Blob(byte[] value) => new OSCValue(OSCValueType.Blob, value);
 
@@ -36,15 +34,7 @@ namespace extOSC
 		public static OSCValue TimeTag(DateTime value) => new OSCValue(OSCValueType.TimeTag, value);
 
 		public static OSCValue Midi(OSCMidi value) => new OSCValue(OSCValueType.Midi, value);
-
-		public static OSCValue Array(params OSCValue[] values) => new OSCValue(OSCValueType.Array, new List<OSCValue>(values));
-
-		[Obsolete]
-		public static char GetTag(Type type)
-		{
-			return GetTag(GetValueType(type));
-		}
-
+		
 		public static char GetTag(OSCValueType valueType)
 		{
 			switch (valueType)
@@ -79,8 +69,8 @@ namespace extOSC
 					return 't';
 				case OSCValueType.Midi:
 					return 'm';
-				case OSCValueType.Array:
-					return 'N';
+				// case OSCValueType.Array:
+				// 	return 'N';
 				default:
 					return 'N';
 			}
@@ -118,8 +108,8 @@ namespace extOSC
 					return OSCValueType.TimeTag;
 				case 'm':
 					return OSCValueType.Midi;
-				case '[':
-					return OSCValueType.Array;
+				// case '[':
+				// 	return OSCValueType.Array;
 				//case ']':
 				//	return OSCValueType.Array;
 				default:
@@ -127,84 +117,81 @@ namespace extOSC
 			}
 		}
 
-		public static Type GetType(OSCValueType valueType)
-		{
-			if (valueType == OSCValueType.Unknown)
-				return null;
-			if (valueType == OSCValueType.Int)
-				return typeof(int);
-			if (valueType == OSCValueType.Long)
-				return typeof(long);
-			if (valueType == OSCValueType.True)
-				return typeof(bool);
-			if (valueType == OSCValueType.False)
-				return typeof(bool);
-			if (valueType == OSCValueType.Float)
-				return typeof(float);
-			if (valueType == OSCValueType.Double)
-				return typeof(double);
-			if (valueType == OSCValueType.String)
-				return typeof(string);
-			if (valueType == OSCValueType.Null)
-				return null;
-			if (valueType == OSCValueType.Impulse)
-				return null;
-			if (valueType == OSCValueType.Blob)
-				return typeof(byte[]);
-			if (valueType == OSCValueType.Char)
-				return typeof(char);
-			if (valueType == OSCValueType.Color)
-				return typeof(Color);
-			if (valueType == OSCValueType.TimeTag)
-				return typeof(DateTime);
-			if (valueType == OSCValueType.Midi)
-				return typeof(OSCMidi);
-			if (valueType == OSCValueType.Array)
-				return typeof(List<OSCValue>);
+		// INFO: Unused?
+		// public static Type GetType(OSCValueType valueType)
+		// {
+		// 	if (valueType == OSCValueType.Unknown)
+		// 		return null;
+		// 	if (valueType == OSCValueType.Int)
+		// 		return typeof(int);
+		// 	if (valueType == OSCValueType.Long)
+		// 		return typeof(long);
+		// 	if (valueType == OSCValueType.True)
+		// 		return typeof(bool);
+		// 	if (valueType == OSCValueType.False)
+		// 		return typeof(bool);
+		// 	if (valueType == OSCValueType.Float)
+		// 		return typeof(float);
+		// 	if (valueType == OSCValueType.Double)
+		// 		return typeof(double);
+		// 	if (valueType == OSCValueType.String)
+		// 		return typeof(string);
+		// 	if (valueType == OSCValueType.Null)
+		// 		return null;
+		// 	if (valueType == OSCValueType.Impulse)
+		// 		return null;
+		// 	if (valueType == OSCValueType.Blob)
+		// 		return typeof(byte[]);
+		// 	if (valueType == OSCValueType.Char)
+		// 		return typeof(char);
+		// 	if (valueType == OSCValueType.Color)
+		// 		return typeof(Color);
+		// 	if (valueType == OSCValueType.TimeTag)
+		// 		return typeof(DateTime);
+		// 	if (valueType == OSCValueType.Midi)
+		// 		return typeof(OSCMidi);
+		// 	if (valueType == OSCValueType.Array)
+		// 		return typeof(List<OSCValue>);
+		//
+		// 	return null;
+		// }
+		//
+		// public static OSCValueType GetValueType(Type type)
+		// {
+		// 	if (type == typeof(int))
+		// 		return OSCValueType.Int;
+		// 	if (type == typeof(long))
+		// 		return OSCValueType.Long;
+		// 	if (type == typeof(bool))
+		// 		return OSCValueType.False;
+		// 	if (type == typeof(float))
+		// 		return OSCValueType.Float;
+		// 	if (type == typeof(double))
+		// 		return OSCValueType.Double;
+		// 	if (type == typeof(string))
+		// 		return OSCValueType.String;
+		// 	if (type == typeof(byte[]))
+		// 		return OSCValueType.Blob;
+		// 	if (type == typeof(char))
+		// 		return OSCValueType.Char;
+		// 	if (type == typeof(Color))
+		// 		return OSCValueType.Color;
+		// 	if (type == typeof(DateTime))
+		// 		return OSCValueType.TimeTag;
+		// 	if (type == typeof(OSCMidi))
+		// 		return OSCValueType.Midi;
+		// 	if (type == typeof(List<OSCValue>))
+		// 		return OSCValueType.Array;
+		//
+		// 	return OSCValueType.Unknown;
+		// }
 
-			return null;
-		}
-
-		public static OSCValueType GetValueType(Type type)
-		{
-			if (type == typeof(int))
-				return OSCValueType.Int;
-			if (type == typeof(long))
-				return OSCValueType.Long;
-			if (type == typeof(bool))
-				return OSCValueType.False;
-			if (type == typeof(float))
-				return OSCValueType.Float;
-			if (type == typeof(double))
-				return OSCValueType.Double;
-			if (type == typeof(string))
-				return OSCValueType.String;
-			if (type == typeof(byte[]))
-				return OSCValueType.Blob;
-			if (type == typeof(char))
-				return OSCValueType.Char;
-			if (type == typeof(Color))
-				return OSCValueType.Color;
-			if (type == typeof(DateTime))
-				return OSCValueType.TimeTag;
-			if (type == typeof(OSCMidi))
-				return OSCValueType.Midi;
-			if (type == typeof(List<OSCValue>))
-				return OSCValueType.Array;
-
-			return OSCValueType.Unknown;
-		}
-
-		#endregion
-
-		#region Public Vars
-
-		public object Value => _value;
 
 		public OSCValueType Type => _type;
+		public object Value => _value;
+		public string Tag => GetTag(_type).ToString();
 
-		public string Tag => _type == OSCValueType.Array ? GetArrayTag() : GetTag(_type).ToString();
-
+		
 		public long LongValue
 		{
 			get => GetValue<long>(OSCValueType.Long);
@@ -217,9 +204,9 @@ namespace extOSC
 			set => _value = value;
 		}
 
-		public Color ColorValue
+		public OSCColor ColorValue
 		{
-			get => GetValue<Color>(OSCValueType.Color);
+			get => GetValue<OSCColor>(OSCValueType.Color);
 			set => _value = value;
 		}
 
@@ -274,24 +261,10 @@ namespace extOSC
 			get => GetValue<OSCMidi>(OSCValueType.Midi);
 			set => _value = value;
 		}
-
-		public List<OSCValue> ArrayValue
-		{
-			get => GetValue<List<OSCValue>>(OSCValueType.Array);
-			set => _value = value;
-		}
-
-		#endregion
-
-		#region Private Vars
-
+		
+		private OSCValueType _type;
 		private object _value;
 
-		private OSCValueType _type;
-
-		#endregion
-
-		#region Public Methods
 
 		public OSCValue(OSCValueType type, object value)
 		{
@@ -299,50 +272,20 @@ namespace extOSC
 			_type = type;
 		}
 
-		public void AddValue(OSCValue arrayValue)
-		{
-			if (_type != OSCValueType.Array)
-				throw new Exception("OSCValue must be \"Array\" type.");
-
-			if (arrayValue == this)
-				throw new Exception("OSCValue with \"Array\" type cannot store itself.");
-
-			ArrayValue.Add(arrayValue);
-		}
-
-		public OSCValue Copy() => new OSCValue(Type, Value);
+		public OSCValue Copy() => new OSCValue(_type, _value);
 
 		public override string ToString()
 		{
-			if (_type == OSCValueType.True || _type == OSCValueType.False || _type == OSCValueType.Null || _type == OSCValueType.Impulse)
+			if (_type == OSCValueType.True  ||
+			    _type == OSCValueType.False ||
+			    _type == OSCValueType.Null  ||
+			    _type == OSCValueType.Impulse)
 			{
 				return $"<OSCValue {Tag}>";
 			}
 
-			if (_type == OSCValueType.Array)
-			{
-				var stringValues = string.Empty;
-
-				if (ArrayValue.Count > 0)
-				{
-					foreach (var arrayValue in ArrayValue)
-					{
-						stringValues += arrayValue + ", ";
-					}
-
-					if (stringValues.Length > 2)
-						stringValues = stringValues.Remove(stringValues.Length - 2);
-				}
-
-				return $"<OSCValue Array [{stringValues}]>";
-			}
-
 			return $"<OSCValue {Tag}: {_value}>";
 		}
-
-		#endregion
-
-		#region Private Methods
 
 		private T GetValue<T>(OSCValueType requiredType)
 		{
@@ -353,21 +296,5 @@ namespace extOSC
 
 			return default;
 		}
-
-		private string GetArrayTag()
-		{
-			var arrayTag = "[";
-
-			foreach (var arrayValue in ArrayValue)
-			{
-				arrayTag += arrayValue.Tag;
-			}
-
-			arrayTag += "]";
-
-			return arrayTag;
-		}
-
-		#endregion
 	}
 }

@@ -35,15 +35,12 @@ namespace extOSC.Components
 
 		[OSCSelector]
 		[SerializeField]
-		[FormerlySerializedAs("transmitter")]
 		private OSCTransmitter _transmitter;
 
 		[SerializeField]
-		[FormerlySerializedAs("address")]
 		private string _address = "/address";
 
 		[SerializeField]
-		[FormerlySerializedAs("mapBundle")]
 		private OSCMapBundle _mapBundle;
 
 		#endregion

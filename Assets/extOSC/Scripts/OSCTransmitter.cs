@@ -129,38 +129,30 @@ namespace extOSC
 		#region Private Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("localHostMode")]
 		private OSCLocalHostMode _localHostMode = OSCLocalHostMode.Any;
 
 		[SerializeField]
-		[FormerlySerializedAs("localPortMode")]
 		private OSCLocalPortMode _localPortMode = OSCLocalPortMode.Random;
 
 		[OSCSelector]
 		[SerializeField]
-		[FormerlySerializedAs("localReceiver")]
 		private OSCReceiver _localReceiver;
 
 		[OSCHost]
 		[SerializeField]
-		[FormerlySerializedAs("localHost")]
 		private string _localHost;
 
 		[SerializeField]
-		[FormerlySerializedAs("localPort")]
 		private int _localPort = 7000;
 
 		[OSCHost]
 		[SerializeField]
-		[FormerlySerializedAs("remoteHost")]
 		private string _remoteHost = "127.0.0.1";
 
 		[SerializeField]
-		[FormerlySerializedAs("remotePort")]
 		private int _remotePort = 7000;
 
 		[SerializeField]
-		[FormerlySerializedAs("useBundle")]
 		private bool _useBundle;
 
 		private readonly List<IOSCPacket> _bundleBuffer = new List<IOSCPacket>();
@@ -181,7 +173,7 @@ namespace extOSC
 
 				foreach (var packet in _bundleBuffer)
 				{
-					bundle.AddPacket(packet);
+					bundle.Append(packet);
 				}
 
 				Send(bundle);

@@ -24,7 +24,6 @@ namespace extOSC.Mapping
 		#region Protected Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("messages")]
 		protected List<OSCMapMessage> _messages = new List<OSCMapMessage>();
 
 		#endregion

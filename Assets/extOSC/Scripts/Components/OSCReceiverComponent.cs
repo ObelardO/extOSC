@@ -67,15 +67,12 @@ namespace extOSC.Components
 
 		[OSCSelector]
 		[SerializeField]
-		[FormerlySerializedAs("receiver")]
 		private OSCReceiver _receiver;
 
 		[SerializeField]
-		[FormerlySerializedAs("address")]
 		private string _address = "/address";
 
 		[SerializeField]
-		[FormerlySerializedAs("mapBundle")]
 		private OSCMapBundle _mapBundle;
 
 		private OSCEventMessage _callback;

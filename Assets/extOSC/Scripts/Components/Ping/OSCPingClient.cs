@@ -41,15 +41,12 @@ namespace extOSC.Components.Ping
 		#region Private Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("interval")]
 		private float _interval;
 
 		[SerializeField]
-		[FormerlySerializedAs("timeout")]
 		private float _timeout;
 
 		[SerializeField]
-		[FormerlySerializedAs("autoStart")]
 		private bool _autoStart = true;
 
 		private float _timer;

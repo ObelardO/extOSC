@@ -12,8 +12,6 @@ namespace extOSC.Core.Network
 {
 	internal class OSCReceiverStandaloneBackend : OSCReceiverBackend
 	{
-		#region Public Vars
-
 		public override OSCReceivedCallback ReceivedCallback
 		{
 			get => _receivedCallback;
@@ -24,10 +22,6 @@ namespace extOSC.Core.Network
 
 		public override bool IsRunning => _isRunning;
 
-		#endregion
-
-		#region Private Vars
-
 		private bool _isRunning;
 
 		private UdpClient _client;
@@ -35,10 +29,6 @@ namespace extOSC.Core.Network
 		private AsyncCallback _controllerThreadAsync;
 
 		private OSCReceivedCallback _receivedCallback;
-
-		#endregion
-
-		#region Public Methods
 
 		public override void Connect(string localHost, int localPort)
 		{
@@ -93,10 +83,6 @@ namespace extOSC.Core.Network
 			_isRunning = false;
 			_client = null;
 		}
-
-		#endregion
-
-		#region Protected Methods
 
 		protected void ControllerThread(IAsyncResult result)
 		{
@@ -153,8 +139,6 @@ namespace extOSC.Core.Network
 
 			return null;
 		}
-
-		#endregion
 	}
 }
 

@@ -55,20 +55,16 @@ namespace extOSC.Components
 
 		[OSCSelector]
 		[SerializeField]
-		[FormerlySerializedAs("receiver")]
 		private OSCReceiver _receiver;
 
 		[OSCSelector]
 		[SerializeField]
-		[FormerlySerializedAs("transmitter")]
 		private OSCTransmitter _transmitter;
 
 		[SerializeField]
-		[FormerlySerializedAs("receiverAddress")]
 		private string _receiverAddress = "/address/receiver";
 
 		[SerializeField]
-		[FormerlySerializedAs("transmitterAddress")]
 		private string _transmitterAddress = "/address/transmitter";
 
 		private OSCBind _receiverBind;

@@ -21,7 +21,7 @@ namespace extOSC
 	{
 		#region Static Private Vars
 
-		private static readonly Dictionary<string, List<string>> _cachedAddress = new Dictionary<string, List<string>>();
+		private static readonly Dictionary<string, List<string>> _cachedAddress = new();
 
 		#endregion
 
@@ -486,35 +486,6 @@ namespace extOSC
 			return false;
 		}
 
-		public static bool ToArray(this OSCMessage message, out List<OSCValue> value)
-		{
-			var values = message.FindValues(OSCValueType.Array);
-			if (values.Length > 0)
-			{
-				var firstValue = values[0];
-
-				value = firstValue.ArrayValue;
-				return true;
-			}
-
-			value = new List<OSCValue>();
-			return false;
-		}
-
-		public static bool IsSubclassOf(Type targetType, Type sourceType)
-		{
-#if !UNITY_WSA || UNITY_EDITOR
-			return (targetType.IsSubclassOf(sourceType) || targetType == sourceType);
-#else
-            return (targetType.GetTypeInfo().IsSubclassOf(sourceType) || targetType == sourceType);
-#endif
-		}
-
-		public static bool IsSubclassOf(object target, Type targetType)
-		{
-			return IsSubclassOf(target.GetType(), targetType);
-		}
-
 		public static int IndexOf<T>(this T[] array, T target) where T : class
 		{
 			for (var i = 0; i < array.Length; ++i)
@@ -561,5 +532,6 @@ namespace extOSC
 		}
 
 		#endregion
+
 	}
 }

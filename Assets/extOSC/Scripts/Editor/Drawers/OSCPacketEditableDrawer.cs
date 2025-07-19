@@ -110,12 +110,12 @@ namespace extOSC.Editor.Drawers
 				GUI.color = Color.green;
 				if (GUILayout.Button(_addBundleContent))
 				{
-					bundle.AddPacket(new OSCBundle());
+					bundle.Append(new OSCBundle());
 				}
 
 				if (GUILayout.Button(_addMessageContent))
 				{
-					bundle.AddPacket(new OSCMessage("/address"));
+					bundle.Append(new OSCMessage("/address"));
 				}
 
 				GUI.color = defaultColor;

@@ -30,11 +30,9 @@ namespace extOSC.Mapping
 		#region Protected Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("address")]
 		private string _address = "/address";
 
 		[SerializeField]
-		[FormerlySerializedAs("values")]
 		private List<OSCMapValue> _values = new List<OSCMapValue>();
 
 		#endregion

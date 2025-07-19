@@ -21,7 +21,6 @@ namespace extOSC.Components.ReceiverReflections
 		#region Protected Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("reflectionMembers")]
 		private List<OSCReflectionMember> _reflectionMembers = new List<OSCReflectionMember>();
 
 		protected readonly Dictionary<OSCReflectionMember, OSCReflectionProperty> _cachedProperties = new Dictionary<OSCReflectionMember, OSCReflectionProperty>();

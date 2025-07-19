@@ -38,11 +38,9 @@ namespace extOSC.Components.Misc
 		#region Private Vars
 
 		[SerializeField]
-		[FormerlySerializedAs("speed")]
 		private float _speed = 1;
 
 		[SerializeField]
-		[FormerlySerializedAs("mode")]
 		private GyroMode _mode = GyroMode.TouchOSC;
 
 		private Quaternion _defaultRotation;

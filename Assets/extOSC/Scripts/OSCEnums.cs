@@ -23,7 +23,7 @@ namespace extOSC
 		Blob,    // Tag: b (byte array - osc)
 		TimeTag, // Tag: t (osc-time tag)
 		Midi,    // Tag: m (MIDI O_o)
-		Array    // Tag: "[" and "]"
+		//Array    // Tag: "[" and "]"
 	}
 
 	[System.Flags]
