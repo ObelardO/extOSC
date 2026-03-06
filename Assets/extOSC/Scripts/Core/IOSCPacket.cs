@@ -5,9 +5,11 @@ using System.Net;
 
 namespace extOSC.Core
 {
-	public interface IOSCPacket : ICloneable
+	// TODO: Remove IClonable, replace on custom Clone method.
+	public interface IOSCPacket
 	{
 		string Address { get; }
 		IPEndPoint From { get; set; }
+		IOSCPacket Clone();
 	}
 }

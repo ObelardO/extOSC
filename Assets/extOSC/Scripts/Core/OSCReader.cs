@@ -5,6 +5,7 @@ namespace extOSC.Core
 {
     internal static class OSCReader
     {
+        private static readonly object _lock = new();
         private static readonly DateTime _zeroTime = new DateTime(1900, 1, 1, 0, 0, 0, 0);
         
         // read
@@ -244,8 +245,11 @@ namespace extOSC.Core
             var part1 = (timestamp >> 32) & 0xFFFFFFFF; 
             var part2 = (timestamp >>  0) & 0xFFFFFFFF;
             var totalMSec = part1 * 1000 + part2 * 1000 / 0x100000000L;
-            
-            return _zeroTime.AddMilliseconds(totalMSec);
+
+            lock (_lock)
+            {
+                return _zeroTime.AddMilliseconds(totalMSec);
+            }
         }
         
         // tools

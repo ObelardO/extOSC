@@ -1,12 +1,10 @@
 ﻿/* Copyright (c) 2024 dr. ext (Vladimir Sigalkin) */
 
-using UnityEngine;
-
 using System;
-using System.Collections.Generic;
 
 namespace extOSC
 {
+	// TODO: Reduce boxing
 	public class OSCValue
 	{
 		public static OSCValue Long(long value) => new OSCValue(OSCValueType.Long, value);
@@ -272,7 +270,7 @@ namespace extOSC
 			_type = type;
 		}
 
-		public OSCValue Copy() => new OSCValue(_type, _value);
+		public OSCValue Clone() => new OSCValue(_type, _value);
 
 		public override string ToString()
 		{

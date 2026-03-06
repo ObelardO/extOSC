@@ -65,14 +65,14 @@ namespace extOSC
 		}
 
 		// TODO: Optimize.
-		public object Clone()
+		public IOSCPacket Clone()
 		{
 			var packetsCount = Packets.Count;
 			var packets = new IOSCPacket[packetsCount];
 
 			for (var i = 0; i < packetsCount; ++i)
 			{
-				packets[i] = Packets[i].Clone() as IOSCPacket;
+				packets[i] = Packets[i].Clone();
 			}
 
 			return new OSCBundle(packets);

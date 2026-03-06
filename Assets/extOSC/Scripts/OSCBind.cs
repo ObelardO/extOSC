@@ -1,6 +1,5 @@
 ﻿/* Copyright (c) 2024 dr. ext (Vladimir Sigalkin) */
 
-using UnityEngine;
 using UnityEngine.Events;
 using extOSC.Core;
 using extOSC.Core.Events;

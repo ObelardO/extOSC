@@ -6,8 +6,9 @@ namespace extOSC.Core
 {
     internal static class OSCWriter
     {
+        private static readonly object _lock = new();
         private static readonly byte[] _zeroBytes = { 0, 0, 0, 0 };
-        private static readonly DateTime _zeroTime = new DateTime(1900, 1, 1, 0, 0, 0, 0);
+        private static readonly DateTime _zeroTime = new(1900, 1, 1, 0, 0, 0, 0);
         
         // write
         public static void Write(MemoryStream stream, IOSCPacket packet, bool useAscii)
@@ -62,7 +63,6 @@ namespace extOSC.Core
                 case OSCValueType.Long:
                     Write(stream, value.LongValue);
                     break;
-
                 case OSCValueType.Float:
                     Write(stream, value.FloatValue);
                     break;
@@ -250,7 +250,10 @@ namespace extOSC.Core
             var offset = targetSize - size;
             if (offset > 0)
             {
-                stream.Write(_zeroBytes, 0, offset);
+                lock (_lock)
+                {
+                    stream.Write(_zeroBytes, 0, offset);
+                }
             }
         }
     }
