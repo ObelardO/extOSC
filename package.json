@@ -1,6 +1,6 @@
 {
-  "name": "com.iam1337.extosc",
-  "displayName": "extOSC",
+  "name": "com.iam1337.extosc.tcp",
+  "displayName": "extOSC (with TCP support)",
   "version": "1.21.0",
   "unity": "2018.1",
   "description": "extOSC (Open Sound Control Protocol) is a tool dedicated to simplify creation of applications with OSC protocol usage in Unity.",
@@ -84,7 +84,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/iam1337/extOSC.git#upm"
+    "url": "https://github.com/ObelardO/extOSC.git#upm"
   },
   "publishConfig": {
     "registry": "https://package.openupm.com"
