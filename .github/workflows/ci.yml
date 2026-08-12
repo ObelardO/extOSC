@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+
 name: ⚙ Build and Release
 on:
   push:
@@ -13,6 +16,8 @@ jobs:
       PROJECT_ASSETS: README.md:CHANGELOG.md:LICENSE
     steps:
     - uses: actions/checkout@v2
+      with:
+        etch-depth: 0
     - name: Semantic Release
       id: semantic
       uses: cycjimmy/semantic-release-action@v3
