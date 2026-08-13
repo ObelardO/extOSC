@@ -28,6 +28,9 @@ namespace extOSC.Core.Network
 
         public abstract bool IsAvailable { get; }
 
+        // Connectionless backends are "connected" whenever they can send.
+        public virtual bool IsConnected => IsAvailable;
+
         #endregion
 
         #region Public Methods

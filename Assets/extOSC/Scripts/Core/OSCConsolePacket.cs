@@ -8,7 +8,9 @@ namespace extOSC.Core
 	{
 		Received,
 
-		Transmitted
+		Transmitted,
+
+		Queued
 	}
 
 	public class OSCConsolePacket

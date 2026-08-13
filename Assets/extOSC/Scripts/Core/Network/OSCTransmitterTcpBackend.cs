@@ -43,6 +43,17 @@ namespace extOSC.Core.Network
 
 		public override bool IsAvailable => _sessionActive;
 
+		public override bool IsConnected
+		{
+			get
+			{
+				lock (_lock)
+				{
+					return _sessionActive && _isConnected && _stream != null;
+				}
+			}
+		}
+
 		#endregion
 
 		#region Private Vars

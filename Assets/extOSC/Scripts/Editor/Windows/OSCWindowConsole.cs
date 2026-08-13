@@ -27,6 +27,8 @@ namespace extOSC.Editor.Windows
 
 		private static bool _previousReceived;
 
+		private static bool _previousQueued;
+
 		private static string _previousFilter;
 
 		private static int _maxBufferCapacity = 256;
@@ -45,7 +47,7 @@ namespace extOSC.Editor.Windows
 			Instance.Focus();
 		}
 
-		public static OSCConsolePacket[] GetConsoleBuffer(bool transmitted, bool received, string filter)
+		public static OSCConsolePacket[] GetConsoleBuffer(bool transmitted, bool received, bool queued, string filter)
 		{
 			if (ConsoleBuffer == null || ConsoleBuffer.Count == 0)
 				return _emptyBuffer;
@@ -54,10 +56,12 @@ namespace extOSC.Editor.Windows
 
 			if (_previousTransmitted != transmitted ||
 				_previousReceived != received ||
+				_previousQueued != queued ||
 				_previousFilter != filter)
 			{
 				_previousTransmitted = transmitted;
 				_previousReceived = received;
+				_previousQueued = queued;
 				_previousFilter = filter;
 
 				requireRebuild = true;
@@ -83,7 +87,8 @@ namespace extOSC.Editor.Windows
 			foreach (var consoleMessage in ConsoleBuffer)
 			{
 				if (transmitted && consoleMessage.PacketType == OSCConsolePacketType.Transmitted ||
-					received && consoleMessage.PacketType == OSCConsolePacketType.Received)
+					received && consoleMessage.PacketType == OSCConsolePacketType.Received ||
+					queued && consoleMessage.PacketType == OSCConsolePacketType.Queued)
 				{
 					if (!string.IsNullOrEmpty(filter))
 					{
@@ -120,6 +125,8 @@ namespace extOSC.Editor.Windows
 		private readonly string _showReceivedSettings = OSCEditorSettings.Console + "showreceived";
 
 		private readonly string _showTransmittedSettings = OSCEditorSettings.Console + "showtransmitted";
+
+		private readonly string _showQueuedSettings = OSCEditorSettings.Console + "showqueued";
 
 		private readonly string _trackLastSettings = OSCEditorSettings.Console + "tracklast";
 
@@ -185,6 +192,7 @@ namespace extOSC.Editor.Windows
 
 			_logPanel.ShowReceived = OSCEditorSettings.GetBool(_showReceivedSettings, true);
 			_logPanel.ShowTransmitted = OSCEditorSettings.GetBool(_showTransmittedSettings, true);
+			_logPanel.ShowQueued = OSCEditorSettings.GetBool(_showQueuedSettings, true);
 			_logPanel.TrackLast = OSCEditorSettings.GetBool(_trackLastSettings, false);
 			_logPanel.Filter = OSCEditorSettings.GetString(_filterSettings, string.Empty);
 		}
@@ -197,6 +205,7 @@ namespace extOSC.Editor.Windows
 
 			OSCEditorSettings.SetBool(_showReceivedSettings, _logPanel.ShowReceived);
 			OSCEditorSettings.SetBool(_showTransmittedSettings, _logPanel.ShowTransmitted);
+			OSCEditorSettings.SetBool(_showQueuedSettings, _logPanel.ShowQueued);
 			OSCEditorSettings.SetBool(_trackLastSettings, _logPanel.TrackLast);
 			OSCEditorSettings.SetString(_filterSettings, _logPanel.Filter);
 		}
