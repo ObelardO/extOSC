@@ -346,7 +346,10 @@ namespace extOSC
 			
 			_transmitterBackend.Send(buffer, length);
 
-			OSCConsole.Transmitted(this, packet);
+			if (_transmitterBackend.IsConnected)
+				OSCConsole.Transmitted(this, packet);
+			else
+				OSCConsole.Queued(this, packet);
 		}
 
 		#endregion

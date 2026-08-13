@@ -19,11 +19,15 @@ namespace extOSC.Editor.Panels
 
 		private static readonly GUIContent _receivedContent = new GUIContent("Received");
 
+		private static readonly GUIContent _queuedContent = new GUIContent("Queued", "Packets held by a TCP transmitter while it has no connection.");
+
 		private static readonly GUIContent _trackLastContent = new GUIContent("Track Last");
 
 		private static readonly GUIContent _openInDebugContent = new GUIContent("Open in debug");
 
 		private static readonly GUIContent _generateCodeContent = new GUIContent("Generate Sharp Code");
+
+		private static readonly Color _queuedIconColor = new Color(1f, 0.72f, 0.25f);
 
 		#endregion
 
@@ -62,6 +66,8 @@ namespace extOSC.Editor.Panels
 		public bool ShowTransmitted { get; set; }
 
 		public bool ShowReceived { get; set; }
+
+		public bool ShowQueued { get; set; }
 
 		public bool TrackLast { get; set; }
 
@@ -182,7 +188,7 @@ namespace extOSC.Editor.Panels
 			DrawToolbar(ref contentRect);
 
 			_lastContentRect = new Rect(contentRect);
-			_consoleBuffer = OSCWindowConsole.GetConsoleBuffer(ShowTransmitted, ShowReceived, _filterDrawer.FilterValue);
+			_consoleBuffer = OSCWindowConsole.GetConsoleBuffer(ShowTransmitted, ShowReceived, ShowQueued, _filterDrawer.FilterValue);
 
 			if (TrackLast)
 			{
@@ -309,6 +315,7 @@ namespace extOSC.Editor.Panels
 
 						ShowReceived = GUILayout.Toggle(ShowReceived, _receivedContent, EditorStyles.toolbarButton);
 						ShowTransmitted = GUILayout.Toggle(ShowTransmitted, _transmittedContent, EditorStyles.toolbarButton);
+						ShowQueued = GUILayout.Toggle(ShowQueued, _queuedContent, EditorStyles.toolbarButton);
 
 						GUILayout.FlexibleSpace();
 						GUILayout.Space(5f);
@@ -366,6 +373,7 @@ namespace extOSC.Editor.Panels
 		{
 			var padding = 4;
 			var consoleTexture = (Texture2D) null;
+			var defaultColor = GUI.color;
 
 			if (consolePacket.PacketType == OSCConsolePacketType.Received)
 			{
@@ -375,12 +383,19 @@ namespace extOSC.Editor.Panels
 			{
 				consoleTexture = OSCEditorTextures.Transmitter;
 			}
+			else if (consolePacket.PacketType == OSCConsolePacketType.Queued)
+			{
+				consoleTexture = OSCEditorTextures.Transmitter;
+				GUI.color = _queuedIconColor;
+			}
 
 			GUI.DrawTexture(new Rect(iconsRect.x + padding,
 									 iconsRect.y + padding,
 									 iconsRect.height - padding * 2f,
 									 iconsRect.height - padding * 2f),
 							consoleTexture);
+
+			GUI.color = defaultColor;
 
 			iconsRect.x += iconsRect.height;
 			iconsRect.width -= iconsRect.height;
