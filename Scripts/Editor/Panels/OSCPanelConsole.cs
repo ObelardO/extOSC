@@ -27,7 +27,9 @@ namespace extOSC.Editor.Panels
 
 		private static readonly GUIContent _generateCodeContent = new GUIContent("Generate Sharp Code");
 
-		private static readonly Color _queuedIconColor = new Color(1f, 0.72f, 0.25f);
+		private static readonly Color _pendingIconColor = new Color(1f, 0.72f, 0.25f);
+
+		private static readonly Color _droppedIconColor = new Color(1f, 0.4f, 0.4f);
 
 		#endregion
 
@@ -386,7 +388,11 @@ namespace extOSC.Editor.Panels
 			else if (consolePacket.PacketType == OSCConsolePacketType.Queued)
 			{
 				consoleTexture = OSCEditorTextures.Transmitter;
-				GUI.color = _queuedIconColor;
+
+				if (consolePacket.QueueState == OSCConsoleQueueState.Pending)
+					GUI.color = _pendingIconColor;
+				else if (consolePacket.QueueState == OSCConsoleQueueState.Dropped)
+					GUI.color = _droppedIconColor;
 			}
 
 			GUI.DrawTexture(new Rect(iconsRect.x + padding,

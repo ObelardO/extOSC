@@ -158,6 +158,8 @@ namespace extOSC.Editor.Windows
 				Repaint();
 			}
 
+			var requireSave = false;
+
 			if (OSCConsole.ConsoleBuffer.Count > 0)
 			{
 				foreach (var message in OSCConsole.ConsoleBuffer)
@@ -168,8 +170,20 @@ namespace extOSC.Editor.Windows
 					ConsoleBuffer.Insert(0, message);
 				}
 
-				OSCEditorUtils.SaveConsoleMessages(OSCEditorUtils.LogsFilePath, ConsoleBuffer);
 				OSCConsole.ConsoleBuffer.Clear();
+				requireSave = true;
+			}
+
+			// Already logged packets can change in place, for example when a queued packet is sent.
+			if (OSCConsole.Dirty)
+			{
+				OSCConsole.Dirty = false;
+				requireSave = true;
+			}
+
+			if (requireSave)
+			{
+				OSCEditorUtils.SaveConsoleMessages(OSCEditorUtils.LogsFilePath, ConsoleBuffer);
 				Repaint();
 			}
 

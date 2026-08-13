@@ -82,6 +82,8 @@ namespace extOSC.Core.Network
 
 		private readonly Queue<byte[]> _sendQueue = new Queue<byte[]>();
 
+		private readonly Queue<bool> _queueResults = new Queue<bool>();
+
 		#endregion
 
 		#region Public Methods
@@ -91,7 +93,7 @@ namespace extOSC.Core.Network
 			lock (_lock)
 			{
 				CloseSockets();
-				_sendQueue.Clear();
+				DropQueue();
 				_connecting = false;
 				_isConnected = false;
 
@@ -153,7 +155,7 @@ namespace extOSC.Core.Network
 				_sessionActive = false;
 				_connecting = false;
 				_isConnected = false;
-				_sendQueue.Clear();
+				DropQueue();
 				CloseSockets();
 			}
 		}
@@ -200,7 +202,24 @@ namespace extOSC.Core.Network
 
 				CloseSockets();
 				_connecting = false;
-				_sendQueue.Clear();
+				DropQueue();
+			}
+		}
+
+		public override bool TryTakeQueueResult(out bool sent)
+		{
+			lock (_lock)
+			{
+				if (_queueResults.Count == 0)
+				{
+					sent = false;
+
+					return false;
+				}
+
+				sent = _queueResults.Dequeue();
+
+				return true;
 			}
 		}
 
@@ -229,7 +248,7 @@ namespace extOSC.Core.Network
 			catch (Exception)
 			{
 				_connecting = false;
-				_sendQueue.Clear();
+				DropQueue();
 				CloseSockets();
 			}
 		}
@@ -271,7 +290,7 @@ namespace extOSC.Core.Network
 					if (client != null && client == _client)
 					{
 						_connecting = false;
-						_sendQueue.Clear();
+						DropQueue();
 					}
 				}
 			}
@@ -284,7 +303,7 @@ namespace extOSC.Core.Network
 						CloseSockets();
 						_isConnected = false;
 						_connecting = false;
-						_sendQueue.Clear();
+						DropQueue();
 					}
 				}
 			}
@@ -293,7 +312,10 @@ namespace extOSC.Core.Network
 		private void Enqueue(byte[] data, int length)
 		{
 			while (_sendQueue.Count >= kMaxQueuedPackets)
+			{
 				_sendQueue.Dequeue();
+				_queueResults.Enqueue(false);
+			}
 
 			var copy = new byte[length];
 			Buffer.BlockCopy(data, 0, copy, 0, length);
@@ -304,20 +326,35 @@ namespace extOSC.Core.Network
 		{
 			if (_stream == null) return;
 
-			try
+			while (_sendQueue.Count > 0)
 			{
-				while (_sendQueue.Count > 0)
+				var packet = _sendQueue.Peek();
+
+				try
 				{
-					var packet = _sendQueue.Dequeue();
 					_stream.Write(packet, 0, packet.Length);
 				}
+				catch (Exception)
+				{
+					CloseSockets();
+					_isConnected = false;
+					_connecting = false;
+					DropQueue();
+
+					return;
+				}
+
+				_sendQueue.Dequeue();
+				_queueResults.Enqueue(true);
 			}
-			catch (Exception)
+		}
+
+		private void DropQueue()
+		{
+			while (_sendQueue.Count > 0)
 			{
-				CloseSockets();
-				_isConnected = false;
-				_connecting = false;
-				_sendQueue.Clear();
+				_sendQueue.Dequeue();
+				_queueResults.Enqueue(false);
 			}
 		}
 

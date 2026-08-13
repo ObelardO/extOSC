@@ -160,6 +160,25 @@ namespace extOSC.Editor
 						consoleMessage.TimeStamp = timestampAttribute.InnerText;
 					}
 
+					var queueStateAttribute = messageElement.Attributes["queuestate"];
+					if (queueStateAttribute != null)
+					{
+						consoleMessage.QueueState = (OSCConsoleQueueState) Enum.Parse(typeof(OSCConsoleQueueState), queueStateAttribute.InnerText);
+					}
+
+					var resolveTimestampAttribute = messageElement.Attributes["resolvetimestamp"];
+					if (resolveTimestampAttribute != null)
+					{
+						consoleMessage.ResolveTimeStamp = resolveTimestampAttribute.InnerText;
+					}
+
+					// Nothing can resolve a restored packet: the queue that owned it is gone.
+					if (consoleMessage.PacketType == OSCConsolePacketType.Queued &&
+						consoleMessage.QueueState == OSCConsoleQueueState.Pending)
+					{
+						consoleMessage.QueueState = OSCConsoleQueueState.Unknown;
+					}
+
 					var packetElement = messageElement["packet"];
 					consoleMessage.Packet = OSCUtilities.FromBase64String(packetElement.InnerText);
 
@@ -196,6 +215,18 @@ namespace extOSC.Editor
 				messageElement.Attributes.Append(instanceAttribute);
 				messageElement.Attributes.Append(typeAttribute);
 				messageElement.Attributes.Append(timestampAttribute);
+
+				if (consoleMessage.PacketType == OSCConsolePacketType.Queued)
+				{
+					var queueStateAttribute = document.CreateAttribute("queuestate");
+					queueStateAttribute.InnerText = consoleMessage.QueueState.ToString();
+
+					var resolveTimestampAttribute = document.CreateAttribute("resolvetimestamp");
+					resolveTimestampAttribute.InnerText = consoleMessage.ResolveTimeStamp ?? string.Empty;
+
+					messageElement.Attributes.Append(queueStateAttribute);
+					messageElement.Attributes.Append(resolveTimestampAttribute);
+				}
 
 				var packetElement = document.CreateElement("packet");
 				packetElement.InnerText = OSCUtilities.ToBase64String(consoleMessage.Packet);
