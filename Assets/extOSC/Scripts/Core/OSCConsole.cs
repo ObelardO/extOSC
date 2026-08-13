@@ -13,6 +13,10 @@ namespace extOSC.Core
 
 		public static bool LogConsole { get; set; } = false;
 
+		// Set when an already logged packet was modified in place, so the console window
+		// knows it has to redraw and rewrite the log file.
+		public static bool Dirty { get; set; }
+
 		#endregion
 
         #region Public Methods
@@ -44,17 +48,31 @@ namespace extOSC.Core
             Log(consolePacket);
         }
 
-        public static void Queued(OSCTransmitter transmitter, IOSCPacket packet)
+        public static OSCConsolePacket Queued(OSCTransmitter transmitter, IOSCPacket packet)
         {
             var protocol = GetProtocolLabel(transmitter.Protocol, transmitter.TcpFraming);
 
             var consolePacket = new OSCConsolePacket();
-            consolePacket.Info = $"Transmitter: {transmitter.RemoteHost}:{transmitter.RemotePort} [{protocol}] (queued, no connection)";
+            consolePacket.Info = $"Transmitter: {transmitter.RemoteHost}:{transmitter.RemotePort} [{protocol}]";
             consolePacket.TimeStamp = DateTime.Now.ToString("[HH:mm:ss]");
             consolePacket.PacketType = OSCConsolePacketType.Queued;
+            consolePacket.QueueState = OSCConsoleQueueState.Pending;
             consolePacket.Packet = packet;
 
             Log(consolePacket);
+
+            return consolePacket;
+        }
+
+        public static void ResolveQueued(OSCConsolePacket consolePacket, bool sent)
+        {
+            if (consolePacket == null || consolePacket.QueueState != OSCConsoleQueueState.Pending)
+                return;
+
+            consolePacket.QueueState = sent ? OSCConsoleQueueState.Sent : OSCConsoleQueueState.Dropped;
+            consolePacket.ResolveTimeStamp = DateTime.Now.ToString("HH:mm:ss");
+
+            Dirty = true;
         }
 
         #endregion

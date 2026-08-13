@@ -46,6 +46,15 @@ namespace extOSC.Core.Network
         public virtual void Tick()
         { }
 
+        // Reports what happened to packets that Send() had to queue, oldest first.
+        // Must be drained from the main thread.
+        public virtual bool TryTakeQueueResult(out bool sent)
+        {
+            sent = false;
+
+            return false;
+        }
+
         #endregion
     }
 }

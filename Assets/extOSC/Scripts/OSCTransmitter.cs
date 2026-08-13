@@ -233,6 +233,9 @@ namespace extOSC
 
 		private readonly List<IOSCPacket> _bundleBuffer = new List<IOSCPacket>();
 
+		// Console rows for packets the backend had to queue, in the same order as the backend queue.
+		private readonly Queue<OSCConsolePacket> _queuedConsolePackets = new Queue<OSCConsolePacket>();
+
 		private OSCTransmitterBackend _transmitterBackend
 		{
 			get
@@ -254,6 +257,8 @@ namespace extOSC
 		{
 			if (__transmitterBackend != null)
 				__transmitterBackend.Tick();
+
+			DrainQueueResults();
 
 			if (_bundleBuffer.Count > 0)
 			{
@@ -314,6 +319,8 @@ namespace extOSC
 		{
 			if (_transmitterBackend.IsAvailable)
 				_transmitterBackend.Close();
+
+			DrainQueueResults();
 		}
 
 		public override string ToString()
@@ -349,7 +356,7 @@ namespace extOSC
 			if (_transmitterBackend.IsConnected)
 				OSCConsole.Transmitted(this, packet);
 			else
-				OSCConsole.Queued(this, packet);
+				_queuedConsolePackets.Enqueue(OSCConsole.Queued(this, packet));
 		}
 
 		#endregion
@@ -416,12 +423,25 @@ namespace extOSC
 			}
 		}
 
+		private void DrainQueueResults()
+		{
+			if (__transmitterBackend == null)
+				return;
+
+			while (__transmitterBackend.TryTakeQueueResult(out var sent) && _queuedConsolePackets.Count > 0)
+			{
+				OSCConsole.ResolveQueued(_queuedConsolePackets.Dequeue(), sent);
+			}
+		}
+
 		private void RecreateBackend()
 		{
 			if (__transmitterBackend != null)
 			{
 				if (__transmitterBackend.IsAvailable)
 					__transmitterBackend.Close();
+
+				DrainQueueResults();
 
 				__transmitterBackend = null;
 			}
