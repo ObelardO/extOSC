@@ -130,7 +130,7 @@ namespace extOSC.Core.Network
 				}
 				else
 				{
-					Debug.LogErrorFormat($"[OSCReceiver] Socket Error: Error Code {e.ErrorCode}.\n{e.Message}");
+					Debug.LogErrorFormat($"[OSCReceiver] Socket Error: Error Code {e.ErrorCode}.");
 				}
 
 				Close();
@@ -141,9 +141,9 @@ namespace extOSC.Core.Network
 
 				Close();
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				Debug.LogErrorFormat($"[OSCReceiver] Error: {e}");
+				Debug.LogError("[OSCReceiver] Error while opening TCP socket.");
 
 				Close();
 			}
@@ -214,11 +214,8 @@ namespace extOSC.Core.Network
 			}
 			catch (ObjectDisposedException)
 			{ }
-			catch (Exception e)
-			{
-				if (_isRunning)
-					Debug.LogError($"[OSCReceiver] TCP accept error: {e}");
-			}
+			catch (Exception)
+			{ }
 		}
 
 		private void ReadCallback(IAsyncResult result)
@@ -264,11 +261,8 @@ namespace extOSC.Core.Network
 			{
 				RemoveClient(state);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				if (_isRunning)
-					Debug.LogError($"[OSCReceiver] TCP receive error: {e}");
-
 				RemoveClient(state);
 			}
 		}

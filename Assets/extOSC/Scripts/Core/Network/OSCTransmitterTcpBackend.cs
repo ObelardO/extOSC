@@ -109,7 +109,7 @@ namespace extOSC.Core.Network
 					}
 					else
 					{
-						Debug.LogError($"[OSCTransmitter] Socket Error: Error Code {e.ErrorCode}.\n{e.Message}");
+						Debug.LogError($"[OSCTransmitter] Socket Error: Error Code {e.ErrorCode}.");
 					}
 
 					_sessionActive = false;
@@ -121,9 +121,9 @@ namespace extOSC.Core.Network
 					_sessionActive = false;
 					CloseSockets();
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
-					Debug.LogError($"[OSCTransmitter] Error: {e}");
+					Debug.LogError("[OSCTransmitter] Error while opening TCP socket.");
 					_sessionActive = false;
 					CloseSockets();
 				}
@@ -162,9 +162,8 @@ namespace extOSC.Core.Network
 						_stream.Write(_encodeBuffer, 0, encodedLength);
 						return;
 					}
-					catch (Exception exception)
+					catch (Exception)
 					{
-						Debug.LogWarningFormat("[OSCTransmitter] Error: {0}", exception);
 						CloseSockets();
 						_isConnected = false;
 					}
@@ -216,9 +215,8 @@ namespace extOSC.Core.Network
 				_connectStartedAt = Time.realtimeSinceStartup;
 				_client.BeginConnect(_remoteEndPoint.Address, _remoteEndPoint.Port, ConnectCallback, _client);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				Debug.LogWarning($"[OSCTransmitter] TCP connect error: {e.Message}");
 				_connecting = false;
 				_sendQueue.Clear();
 				CloseSockets();
@@ -266,10 +264,8 @@ namespace extOSC.Core.Network
 					}
 				}
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				Debug.LogWarning($"[OSCTransmitter] TCP connect error: {e.Message}");
-
 				lock (_lock)
 				{
 					if (client != null && client == _client)
@@ -305,9 +301,8 @@ namespace extOSC.Core.Network
 					_stream.Write(packet, 0, packet.Length);
 				}
 			}
-			catch (Exception exception)
+			catch (Exception)
 			{
-				Debug.LogWarningFormat("[OSCTransmitter] Error: {0}", exception);
 				CloseSockets();
 				_isConnected = false;
 				_connecting = false;
