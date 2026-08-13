@@ -14,6 +14,8 @@ namespace extOSC.Editor
 
 		private const string DefaultDefine = "EXTOSC";
 
+		private const string TcpDefine = "EXTOSC_TCP";
+
 		#endregion
 
 		#region Constructor Methods
@@ -22,6 +24,9 @@ namespace extOSC.Editor
 		{
 			if (!HasDefine(DefaultDefine))
 				SetDefine(DefaultDefine, true);
+
+			if (!HasDefine(TcpDefine))
+				SetDefine(TcpDefine, true);
 		}
 
 		#endregion
