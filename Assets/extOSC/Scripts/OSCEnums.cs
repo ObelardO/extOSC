@@ -65,4 +65,16 @@ namespace extOSC
 		IgnoreBundle = 1 << 0,
 		IgnoreMap = 1 << 1,
 	}
+
+	public enum OSCProtocol
+	{
+		UDP,
+		TCP
+	}
+
+	public enum OSCTcpFraming
+	{
+		SizePreamble, // OSC 1.0
+		SLIP          // OSC 1.1
+	}
 }

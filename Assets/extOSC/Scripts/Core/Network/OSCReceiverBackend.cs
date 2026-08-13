@@ -12,8 +12,11 @@ namespace extOSC.Core.Network
 
         #region Public Methods
 
-        public static OSCReceiverBackend Create()
+        public static OSCReceiverBackend Create(OSCProtocol protocol)
         {
+            if (protocol == OSCProtocol.TCP)
+                return new OSCReceiverTcpBackend();
+
 #if UNITY_WSA && !UNITY_EDITOR
             return new OSCReceiverWindowsStoreBackend();
 #else
@@ -24,6 +27,8 @@ namespace extOSC.Core.Network
         #endregion
 
         #region Public Vars
+
+        public virtual OSCTcpFraming TcpFraming { get; set; }
 
         public abstract OSCReceivedCallback ReceivedCallback { get; set; }
 

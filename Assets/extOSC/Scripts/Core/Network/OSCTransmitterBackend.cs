@@ -6,8 +6,11 @@ namespace extOSC.Core.Network
     {
         #region Static Public Methods
 
-        public static OSCTransmitterBackend Create()
+        public static OSCTransmitterBackend Create(OSCProtocol protocol)
         {
+            if (protocol == OSCProtocol.TCP)
+                return new OSCTransmitterTcpBackend();
+
 #if UNITY_WSA && !UNITY_EDITOR
             return new OSCTransmitterWindowsStoreBackend();
 #else
@@ -18,6 +21,10 @@ namespace extOSC.Core.Network
         #endregion
 
         #region Public Vars
+
+        public virtual OSCTcpFraming TcpFraming { get; set; }
+
+        public virtual float TcpReconnectTimeout { get; set; }
 
         public abstract bool IsAvailable { get; }
 
@@ -32,6 +39,9 @@ namespace extOSC.Core.Network
         public abstract void Close();
 
         public abstract void Send(byte[] data, int length);
+
+        public virtual void Tick()
+        { }
 
         #endregion
     }

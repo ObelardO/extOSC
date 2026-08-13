@@ -18,6 +18,47 @@ namespace extOSC
 
 		public override bool IsStarted => _transmitterBackend.IsAvailable;
 
+		public OSCProtocol Protocol
+		{
+			get => _protocol;
+			set
+			{
+				if (_protocol == value)
+					return;
+
+				var wasStarted = __transmitterBackend != null && __transmitterBackend.IsAvailable;
+
+				if (wasStarted)
+					Close();
+
+				_protocol = value;
+				RecreateBackend();
+
+				if (wasStarted)
+					Connect();
+			}
+		}
+
+		public OSCTcpFraming TcpFraming
+		{
+			get => _tcpFraming;
+			set
+			{
+				if (_tcpFraming == value)
+					return;
+
+				_tcpFraming = value;
+				if (__transmitterBackend != null)
+					__transmitterBackend.TcpFraming = _tcpFraming;
+
+				if (_protocol == OSCProtocol.TCP && __transmitterBackend != null && __transmitterBackend.IsAvailable)
+				{
+					Close();
+					Connect();
+				}
+			}
+		}
+
 		public OSCLocalHostMode LocalHostMode
 		{
 			get => _localHostMode;
@@ -124,9 +165,33 @@ namespace extOSC
 			set => _useBundle = value;
 		}
 
+		public float TcpReconnectTimeout
+		{
+			get => _tcpReconnectTimeout;
+			set
+			{
+				if (value < 0f)
+					value = 0f;
+
+				if (Mathf.Approximately(_tcpReconnectTimeout, value))
+					return;
+
+				_tcpReconnectTimeout = value;
+
+				if (__transmitterBackend != null)
+					__transmitterBackend.TcpReconnectTimeout = _tcpReconnectTimeout;
+			}
+		}
+
 		#endregion
 
 		#region Private Vars
+
+		[SerializeField]
+		private OSCProtocol _protocol = OSCProtocol.UDP;
+
+		[SerializeField]
+		private OSCTcpFraming _tcpFraming = OSCTcpFraming.SizePreamble;
 
 		[SerializeField]
 		[FormerlySerializedAs("localHostMode")]
@@ -163,11 +228,23 @@ namespace extOSC
 		[FormerlySerializedAs("useBundle")]
 		private bool _useBundle;
 
+		[SerializeField]
+		private float _tcpReconnectTimeout = 3f;
+
 		private readonly List<IOSCPacket> _bundleBuffer = new List<IOSCPacket>();
 
-		private OSCTransmitterBackend _transmitterBackend => __transmitterBackend ?? (__transmitterBackend = OSCTransmitterBackend.Create());
+		private OSCTransmitterBackend _transmitterBackend
+		{
+			get
+			{
+				EnsureBackend();
+				return __transmitterBackend;
+			}
+		}
 
 		private OSCTransmitterBackend __transmitterBackend;
+
+		private OSCProtocol _backendProtocol;
 
 		#endregion
 
@@ -175,6 +252,9 @@ namespace extOSC
 
 		protected virtual void Update()
 		{
+			if (__transmitterBackend != null)
+				__transmitterBackend.Tick();
+
 			if (_bundleBuffer.Count > 0)
 			{
 				var bundle = new OSCBundle();
@@ -201,12 +281,18 @@ namespace extOSC
 			if (_localPort > 0)
 				_localPort = OSCUtilities.ClampPort(_localPort);
 
-			_transmitterBackend.RefreshRemote(_remoteHost, _remotePort);
+			if (_tcpReconnectTimeout < 0f)
+				_tcpReconnectTimeout = 0f;
 
-			if (IsStarted)
+			var wasStarted = __transmitterBackend != null && __transmitterBackend.IsAvailable;
+			if (wasStarted)
 			{
 				Close();
 				Connect();
+			}
+			else if (__transmitterBackend != null)
+			{
+				_transmitterBackend.RefreshRemote(_remoteHost, _remotePort);
 			}
 		}
 #endif
@@ -217,8 +303,11 @@ namespace extOSC
 
 		public override void Connect()
 		{
-			_transmitterBackend.Connect(GetLocalHost(), GetLocalPort());
+			EnsureBackend();
+			_transmitterBackend.TcpFraming = _tcpFraming;
+			_transmitterBackend.TcpReconnectTimeout = _tcpReconnectTimeout;
 			_transmitterBackend.RefreshRemote(_remoteHost, _remotePort);
+			_transmitterBackend.Connect(GetLocalHost(), GetLocalPort());
 		}
 
 		public override void Close()
@@ -229,7 +318,7 @@ namespace extOSC
 
 		public override string ToString()
 		{
-			return $"<{nameof(OSCTransmitter)} (LocalHost: {_localHost} LocalPort: {_localPort} | RemoteHost: {_remoteHost}, RemotePort: {_remotePort})>";
+			return $"<{nameof(OSCTransmitter)} (Protocol: {_protocol} LocalHost: {_localHost} LocalPort: {_localPort} | RemoteHost: {_remoteHost}, RemotePort: {_remotePort})>";
 		}
 
 		public void Send(IOSCPacket packet, OSCSendOptions options = OSCSendOptions.None)
@@ -275,12 +364,19 @@ namespace extOSC
 
 		private void RemoteRefresh()
 		{
+			if (_protocol == OSCProtocol.TCP && IsStarted)
+			{
+				Close();
+				Connect();
+				return;
+			}
+
 			_transmitterBackend.RefreshRemote(_remoteHost, _remotePort);
 		}
 
 		private string GetLocalHost()
 		{
-			if (_localReceiver != null)
+			if (_protocol != OSCProtocol.TCP && _localReceiver != null)
 				return _localReceiver.LocalHost;
 
 			if (_localHostMode == OSCLocalHostMode.Any)
@@ -291,7 +387,7 @@ namespace extOSC
 
 		private int GetLocalPort()
 		{
-			if (_localReceiver != null)
+			if (_protocol != OSCProtocol.TCP && _localReceiver != null)
 				return _localReceiver.LocalPort;
 
 			if (_localPortMode == OSCLocalPortMode.Random)
@@ -304,6 +400,33 @@ namespace extOSC
 				return _localPort;
 
 			return _remotePort;
+		}
+
+		private void EnsureBackend()
+		{
+			if (__transmitterBackend == null || _backendProtocol != _protocol)
+				RecreateBackend();
+			else
+			{
+				__transmitterBackend.TcpFraming = _tcpFraming;
+				__transmitterBackend.TcpReconnectTimeout = _tcpReconnectTimeout;
+			}
+		}
+
+		private void RecreateBackend()
+		{
+			if (__transmitterBackend != null)
+			{
+				if (__transmitterBackend.IsAvailable)
+					__transmitterBackend.Close();
+
+				__transmitterBackend = null;
+			}
+
+			__transmitterBackend = OSCTransmitterBackend.Create(_protocol);
+			__transmitterBackend.TcpFraming = _tcpFraming;
+			__transmitterBackend.TcpReconnectTimeout = _tcpReconnectTimeout;
+			_backendProtocol = _protocol;
 		}
 
 		#endregion

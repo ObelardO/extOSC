@@ -34,6 +34,12 @@ namespace extOSC.Editor
 
 		private static readonly GUIContent _transmitterSettingsContent = new GUIContent("Transmitter Settings:");
 
+		private static readonly GUIContent _protocolContent = new GUIContent("Protocol:");
+
+		private static readonly GUIContent _tcpFramingContent = new GUIContent("TCP Framing:");
+
+		private static readonly GUIContent _tcpReconnectTimeoutContent = new GUIContent("Reconnect Timeout (sec):", "How long Send() holds packets while reconnecting. 0 waits for the OS connect result.");
+
 		private static readonly GUIContent _useBundleContent = new GUIContent("Use Bundle");
 
 		private static readonly GUIContent _autoConnectContent = new GUIContent("Auto Connect");
@@ -42,9 +48,17 @@ namespace extOSC.Editor
 
 		private static readonly GUIContent _orContent = new GUIContent("Or...");
 
+		private static readonly GUIContent[] _tcpFramingContents =
+		{
+			new GUIContent("OSC 1.0 (Size Preamble)"),
+			new GUIContent("OSC 1.1 (SLIP)")
+		};
+
 		private static string _advancedHelp = "Currently \"Advanced settings\" are not available for UWP (WSA).";
 
 		private static string _fromReceiverHelp = "\"FromReceiver\" option is deprecated. Use \"Source Receiver\" settings.";
+
+		private static string _sourceReceiverTcpHelp = "Source Receiver is only available with UDP.";
 
 		#endregion
 
@@ -74,6 +88,12 @@ namespace extOSC.Editor
 
 		private SerializedProperty _localPortProperty;
 
+		private SerializedProperty _protocolProperty;
+
+		private SerializedProperty _tcpFramingProperty;
+
+		private SerializedProperty _tcpReconnectTimeoutProperty;
+
 		private OSCTransmitter _transmitter;
 
 		private string _localHostCache;
@@ -101,6 +121,9 @@ namespace extOSC.Editor
 			_localHostProperty = serializedObject.FindProperty("_localHost");
 			_localPortModeProperty = serializedObject.FindProperty("_localPortMode");
 			_localPortProperty = serializedObject.FindProperty("_localPort");
+			_protocolProperty = serializedObject.FindProperty("_protocol");
+			_tcpFramingProperty = serializedObject.FindProperty("_tcpFraming");
+			_tcpReconnectTimeoutProperty = serializedObject.FindProperty("_tcpReconnectTimeout");
 
 			if (!Application.isPlaying && !_transmitter.IsStarted && _workInEditorProperty.boolValue)
 			{
@@ -139,6 +162,14 @@ namespace extOSC.Editor
 				{
 					EditorGUILayout.PropertyField(_remoteHostProperty, _hostContent);
 					EditorGUILayout.PropertyField(_remotePortProperty, _portContent);
+					EditorGUILayout.PropertyField(_protocolProperty, _protocolContent);
+
+					if (_protocolProperty.enumValueIndex == (int) OSCProtocol.TCP)
+					{
+						_tcpFramingProperty.enumValueIndex = EditorGUILayout.Popup(_tcpFramingContent, _tcpFramingProperty.enumValueIndex, _tcpFramingContents);
+						EditorGUILayout.PropertyField(_tcpReconnectTimeoutProperty, _tcpReconnectTimeoutContent);
+					}
+
 					EditorGUILayout.PropertyField(_mapBundleProperty, _mapBundleContent);
 
 					GUI.color = _useBundleProperty.boolValue ? Color.green : Color.red;
@@ -180,68 +211,40 @@ namespace extOSC.Editor
 						GUI.color = _defaultColor;
 					}
 
-					EditorGUILayout.PropertyField(_sourceReceiverProperty, _sourceReceiverContent);
-
-					var sourceReceiver = _transmitter.SourceReceiver;
-					if (sourceReceiver != null)
+					var isTcp = _protocolProperty.enumValueIndex == (int) OSCProtocol.TCP;
+					if (isTcp)
 					{
-						var localHost = sourceReceiver.LocalHostMode == OSCLocalHostMode.Any
-							? _localHostCache
-							: sourceReceiver.LocalHost;
-						var localPort = sourceReceiver.LocalPort.ToString();
-
-						using (new GUILayout.HorizontalScope())
-						{
-							EditorGUILayout.LabelField(_localHostContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
-							EditorGUILayout.SelectableLabel(localHost, GUILayout.Height(EditorGUIUtility.singleLineHeight));
-						}
-
-						using (new GUILayout.HorizontalScope())
-						{
-							EditorGUILayout.LabelField(_localPortContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
-							EditorGUILayout.SelectableLabel(localPort, GUILayout.Height(EditorGUIUtility.singleLineHeight));
-						}
+						EditorGUILayout.HelpBox(_sourceReceiverTcpHelp, MessageType.Info);
+						DrawLocalEndpointSettings();
 					}
 					else
 					{
-						EditorGUILayout.LabelField(_orContent, EditorStyles.boldLabel);
+						EditorGUILayout.PropertyField(_sourceReceiverProperty, _sourceReceiverContent);
 
-						// LOCAL HOST MODE
-						EditorGUILayout.PropertyField(_localHostModeProperty, _localHostModeContent);
-						if (_transmitter.LocalHostMode == OSCLocalHostMode.Any)
+						var sourceReceiver = _transmitter.SourceReceiver;
+						if (sourceReceiver != null)
 						{
+							var localHost = sourceReceiver.LocalHostMode == OSCLocalHostMode.Any
+								? _localHostCache
+								: sourceReceiver.LocalHost;
+							var localPort = sourceReceiver.LocalPort.ToString();
+
 							using (new GUILayout.HorizontalScope())
 							{
 								EditorGUILayout.LabelField(_localHostContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
-								EditorGUILayout.SelectableLabel(_localHostCache, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+								EditorGUILayout.SelectableLabel(localHost, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+							}
+
+							using (new GUILayout.HorizontalScope())
+							{
+								EditorGUILayout.LabelField(_localPortContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
+								EditorGUILayout.SelectableLabel(localPort, GUILayout.Height(EditorGUIUtility.singleLineHeight));
 							}
 						}
 						else
 						{
-							EditorGUILayout.PropertyField(_localHostProperty, _localHostContent);
-						}
-
-						// LOCAL PORT MODE
-						EditorGUILayout.PropertyField(_localPortModeProperty, _localPortModeContent);
-						if (_transmitter.LocalPortMode == OSCLocalPortMode.FromRemotePort)
-						{
-							// LOCAL FROM REMOTE PORT
-							using (new GUILayout.HorizontalScope())
-							{
-								EditorGUILayout.LabelField(_localPortContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
-								EditorGUILayout.SelectableLabel(_transmitter.RemotePort.ToString(), GUILayout.Height(EditorGUIUtility.singleLineHeight));
-							}
-						}
-						else if (_transmitter.LocalPortMode == OSCLocalPortMode.FromReceiver)
-						{
-							GUI.color = Color.red;
-							EditorGUILayout.HelpBox(_fromReceiverHelp, MessageType.Warning);
-
-							GUI.color = _defaultColor;
-						}
-						else if (_transmitter.LocalPortMode == OSCLocalPortMode.Custom)
-						{
-							EditorGUILayout.PropertyField(_localPortProperty, _localPortContent);
+							EditorGUILayout.LabelField(_orContent, EditorStyles.boldLabel);
+							DrawLocalEndpointSettings();
 						}
 					}
 				}
@@ -322,6 +325,44 @@ namespace extOSC.Editor
 			}
 
 			GUI.enabled = true;
+		}
+
+		private void DrawLocalEndpointSettings()
+		{
+			EditorGUILayout.PropertyField(_localHostModeProperty, _localHostModeContent);
+			if (_transmitter.LocalHostMode == OSCLocalHostMode.Any)
+			{
+				using (new GUILayout.HorizontalScope())
+				{
+					EditorGUILayout.LabelField(_localHostContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
+					EditorGUILayout.SelectableLabel(_localHostCache, GUILayout.Height(EditorGUIUtility.singleLineHeight));
+				}
+			}
+			else
+			{
+				EditorGUILayout.PropertyField(_localHostProperty, _localHostContent);
+			}
+
+			EditorGUILayout.PropertyField(_localPortModeProperty, _localPortModeContent);
+			if (_transmitter.LocalPortMode == OSCLocalPortMode.FromRemotePort)
+			{
+				using (new GUILayout.HorizontalScope())
+				{
+					EditorGUILayout.LabelField(_localPortContent, GUILayout.Width(EditorGUIUtility.labelWidth - 4));
+					EditorGUILayout.SelectableLabel(_transmitter.RemotePort.ToString(), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+				}
+			}
+			else if (_transmitter.LocalPortMode == OSCLocalPortMode.FromReceiver)
+			{
+				GUI.color = Color.red;
+				EditorGUILayout.HelpBox(_fromReceiverHelp, MessageType.Warning);
+
+				GUI.color = _defaultColor;
+			}
+			else if (_transmitter.LocalPortMode == OSCLocalPortMode.Custom)
+			{
+				EditorGUILayout.PropertyField(_localPortProperty, _localPortContent);
+			}
 		}
 
 		#endregion

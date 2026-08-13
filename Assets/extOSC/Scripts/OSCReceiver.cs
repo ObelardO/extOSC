@@ -27,6 +27,47 @@ namespace extOSC
 
 		public override bool IsStarted => _receiverBackend.IsAvailable;
 
+		public OSCProtocol Protocol
+		{
+			get => _protocol;
+			set
+			{
+				if (_protocol == value)
+					return;
+
+				var wasRunning = IsBackendRunning();
+
+				if (wasRunning)
+					Close();
+
+				_protocol = value;
+				RecreateBackend();
+
+				if (wasRunning)
+					Connect();
+			}
+		}
+
+		public OSCTcpFraming TcpFraming
+		{
+			get => _tcpFraming;
+			set
+			{
+				if (_tcpFraming == value)
+					return;
+
+				_tcpFraming = value;
+				if (__receiverBackend != null)
+					__receiverBackend.TcpFraming = _tcpFraming;
+
+				if (_protocol == OSCProtocol.TCP && IsBackendRunning())
+				{
+					Close();
+					Connect();
+				}
+			}
+		}
+
 		public OSCLocalHostMode LocalHostMode
 		{
 			get => _localHostMode;
@@ -93,15 +134,16 @@ namespace extOSC
 		{
 			get
 			{
-				if (__receiverBackend == null)
-				{
-					__receiverBackend = OSCReceiverBackend.Create();
-					__receiverBackend.ReceivedCallback = PacketReceived;
-				}
-
+				EnsureBackend();
 				return __receiverBackend;
 			}
 		}
+
+		[SerializeField]
+		private OSCProtocol _protocol = OSCProtocol.UDP;
+
+		[SerializeField]
+		private OSCTcpFraming _tcpFraming = OSCTcpFraming.SizePreamble;
 
 		[SerializeField]
 		[FormerlySerializedAs("localHostMode")]
@@ -134,6 +176,8 @@ namespace extOSC
 		private readonly object _lock = new object();
 
 		private OSCReceiverBackend __receiverBackend;
+
+		private OSCProtocol _backendProtocol;
 
 		private int _previousPacketsCount;
 
@@ -193,7 +237,8 @@ namespace extOSC
 
 			_localPort = OSCUtilities.ClampPort(_localPort);
 
-			if (_receiverBackend.IsRunning && IsStarted)
+			var wasRunning = __receiverBackend != null && __receiverBackend.IsRunning && __receiverBackend.IsAvailable;
+			if (wasRunning)
 			{
 				Close();
 				Connect();
@@ -207,11 +252,13 @@ namespace extOSC
 
 		public override string ToString()
 		{
-			return $"<{nameof(OSCReceiver)} (LocalHost: {_localHost} LocalPort: {_localPort})>";
+			return $"<{nameof(OSCReceiver)} (Protocol: {_protocol} LocalHost: {_localHost} LocalPort: {_localPort})>";
 		}
 
 		public override void Connect()
 		{
+			EnsureBackend();
+			_receiverBackend.TcpFraming = _tcpFraming;
 			_receiverBackend.Connect(GetLocalHost(), _localPort);
 		}
 
@@ -401,6 +448,35 @@ namespace extOSC
 		private string GetLocalHost()
 		{
 			return _localHostMode == OSCLocalHostMode.Any ? "0.0.0.0" : _localHost;
+		}
+
+		private bool IsBackendRunning()
+		{
+			return __receiverBackend != null && __receiverBackend.IsRunning && __receiverBackend.IsAvailable;
+		}
+
+		private void EnsureBackend()
+		{
+			if (__receiverBackend == null || _backendProtocol != _protocol)
+				RecreateBackend();
+			else
+				__receiverBackend.TcpFraming = _tcpFraming;
+		}
+
+		private void RecreateBackend()
+		{
+			if (__receiverBackend != null)
+			{
+				if (__receiverBackend.IsAvailable)
+					__receiverBackend.Close();
+
+				__receiverBackend = null;
+			}
+
+			__receiverBackend = OSCReceiverBackend.Create(_protocol);
+			__receiverBackend.ReceivedCallback = PacketReceived;
+			__receiverBackend.TcpFraming = _tcpFraming;
+			_backendProtocol = _protocol;
 		}
 
 		#endregion

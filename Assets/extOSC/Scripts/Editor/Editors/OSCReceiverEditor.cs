@@ -28,11 +28,21 @@ namespace extOSC.Editor
 
 		private static readonly GUIContent _receiverSettingsContent = new GUIContent("Receiver Settings:");
 
+		private static readonly GUIContent _protocolContent = new GUIContent("Protocol:");
+
+		private static readonly GUIContent _tcpFramingContent = new GUIContent("TCP Framing:");
+
 		private static readonly GUIContent _autoConnectContent = new GUIContent("Auto Connect");
 
 		private static readonly GUIContent _closeOnPauseContent = new GUIContent("Close On Pause");
 
 		private static readonly GUIContent _drownContent = new GUIContent("Receiver is drown!");
+
+		private static readonly GUIContent[] _tcpFramingContents =
+		{
+			new GUIContent("OSC 1.0 (Size Preamble)"),
+			new GUIContent("OSC 1.1 (SLIP)")
+		};
 
 		private static string _advancedSettingsText = "\"Advanced settings\" are not available for UWP (WSA).";
 		
@@ -49,6 +59,10 @@ namespace extOSC.Editor
 		private SerializedProperty _localHostProperty;
 
 		private SerializedProperty _localPortProperty;
+
+		private SerializedProperty _protocolProperty;
+
+		private SerializedProperty _tcpFramingProperty;
 
 		private SerializedProperty _autoConnectProperty;
 
@@ -76,6 +90,8 @@ namespace extOSC.Editor
 			_localHostModeProperty = serializedObject.FindProperty("_localHostMode");
 			_localHostProperty = serializedObject.FindProperty("_localHost");
 			_localPortProperty = serializedObject.FindProperty("_localPort");
+			_protocolProperty = serializedObject.FindProperty("_protocol");
+			_tcpFramingProperty = serializedObject.FindProperty("_tcpFraming");
 			_autoConnectProperty = serializedObject.FindProperty("_autoConnect");
 			_workInEditorProperty = serializedObject.FindProperty("_workInEditor");
 			_mapBundleProperty = serializedObject.FindProperty("_mapBundle");
@@ -146,6 +162,13 @@ namespace extOSC.Editor
 					}
 
 					EditorGUILayout.PropertyField(_localPortProperty, _localPortContent);
+					EditorGUILayout.PropertyField(_protocolProperty, _protocolContent);
+
+					if (_protocolProperty.enumValueIndex == (int) OSCProtocol.TCP)
+					{
+						_tcpFramingProperty.enumValueIndex = EditorGUILayout.Popup(_tcpFramingContent, _tcpFramingProperty.enumValueIndex, _tcpFramingContents);
+					}
+
 					EditorGUILayout.PropertyField(_mapBundleProperty, _mapBundleContent);
 				}
 
